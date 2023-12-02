@@ -9,6 +9,7 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+	"fmt"
 
 	buildahCopiah "github.com/containers/buildah/copier"
 	"github.com/containers/buildah/pkg/chrootuser"
@@ -122,8 +123,10 @@ func (c *Container) copyToArchive(path string, writer io.Writer) (func() error, 
 			}
 		}
 	}
-
+	fmt.Printf("copyToArchive enter c.stat\n")
 	statInfo, resolvedRoot, resolvedPath, err := c.stat(mountPoint, path)
+	fmt.Printf("copyToArchive exit c.stat\n")
+	fmt.Printf("Second stat end--------------------\n")
 	if err != nil {
 		unmount()
 		return nil, err
@@ -169,6 +172,7 @@ func (c *Container) copyToArchive(path string, writer io.Writer) (func() error, 
 		}
 		return c.joinMountAndExec(
 			func() error {
+				fmt.Printf("enter buildahCopiah.Get\n")
 				return buildahCopiah.Get(resolvedRoot, "", getOptions, []string{resolvedPath}, writer)
 			},
 		)

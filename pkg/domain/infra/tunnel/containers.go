@@ -1057,10 +1057,12 @@ func (ic *ContainerEngine) ContainerCopyFromArchive(ctx context.Context, nameOrI
 }
 
 func (ic *ContainerEngine) ContainerCopyToArchive(ctx context.Context, nameOrID string, path string, writer io.Writer) (entities.ContainerCopyFunc, error) {
+	fmt.Printf("enter CopyToArchive\n")
 	return containers.CopyToArchive(ic.ClientCtx, nameOrID, path, writer)
 }
 
 func (ic *ContainerEngine) ContainerStat(ctx context.Context, nameOrID string, path string) (*entities.ContainerStatReport, error) {
+	fmt.Printf("enter containers.Stat\n")
 	return containers.Stat(ic.ClientCtx, nameOrID, path)
 }
 

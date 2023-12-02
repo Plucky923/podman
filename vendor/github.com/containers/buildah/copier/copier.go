@@ -256,6 +256,7 @@ type StatOptions struct {
 // Relative names in the glob list are treated as being relative to the
 // directory.
 func Stat(root string, directory string, options StatOptions, globs []string) ([]*StatsForGlob, error) {
+	fmt.Printf("Stat\n")
 	req := request{
 		Request:     requestStat,
 		Root:        root,
@@ -306,6 +307,7 @@ type GetOptions struct {
 // Relative names in the glob list are treated as being relative to the
 // directory.
 func Get(root string, directory string, options GetOptions, globs []string, bulkWriter io.Writer) error {
+	fmt.Printf("Get\n")
 	req := request{
 		Request:   requestGet,
 		Root:      root,
@@ -544,7 +546,9 @@ func copierWithoutSubprocess(bulkReader io.Reader, bulkWriter io.Writer, req req
 		}
 	}
 	req.Globs = absoluteGlobs
+	fmt.Printf("enter copierHandler")
 	resp, cb, err := copierHandler(bulkReader, bulkWriter, req)
+	fmt.Printf("exit copierHandler\n")
 	if err != nil {
 		return nil, err
 	}
@@ -698,6 +702,7 @@ func copierWithSubprocess(bulkReader io.Reader, bulkWriter io.Writer, req reques
 }
 
 func copierMain() {
+	fmt.Printf("copierMain\n")
 	var chrooted bool
 	decoder := json.NewDecoder(os.Stdin)
 	encoder := json.NewEncoder(os.Stdout)
@@ -1354,7 +1359,9 @@ func handleRename(rename map[string]string, name string) string {
 
 func copierHandlerGetOne(srcfi os.FileInfo, symlinkTarget, name, contentPath string, options GetOptions, tw *tar.Writer, hardlinkChecker *hardlinkChecker, idMappings *idtools.IDMappings) error {
 	// build the header using the name provided
+	fmt.Printf("enter FileInfoHeader\n")
 	hdr, err := tar.FileInfoHeader(srcfi, symlinkTarget)
+	fmt.Printf("exit FileInfoHeader\n")
 	if err != nil {
 		return fmt.Errorf("generating tar header for %s (%s): %w", contentPath, symlinkTarget, err)
 	}

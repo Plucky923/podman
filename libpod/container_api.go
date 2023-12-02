@@ -1114,12 +1114,13 @@ func (c *Container) CopyToArchive(ctx context.Context, containerPath string, tar
 			return nil, err
 		}
 	}
-
+	fmt.Printf("enter copyToArchive\n")
 	return c.copyToArchive(containerPath, tarStream)
 }
 
 // Stat the specified path *inside* the container and return a file info.
 func (c *Container) Stat(ctx context.Context, containerPath string) (*define.FileInfo, error) {
+	fmt.Printf("containers.Stat\n")
 	if !c.batched {
 		c.lock.Lock()
 		defer c.lock.Unlock()
@@ -1144,7 +1145,7 @@ func (c *Container) Stat(ctx context.Context, containerPath string) (*define.Fil
 			}
 		}()
 	}
-
+	fmt.Printf("c.stat\n")
 	info, _, _, err := c.stat(mountPoint, containerPath)
 	return info, err
 }

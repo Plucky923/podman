@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"syscall"
 
 	"github.com/containers/podman/v4/libpod/define"
 	"golang.org/x/sys/unix"
@@ -73,6 +74,10 @@ func (c *Container) joinMountAndExec(f func() error) error {
 			errChan <- err
 			return
 		}
+		pid := os.Getpid()
+ 		fmt.Println("joinMountAndExec() 当前进程的进程号:", pid)  
+		tid := syscall.Gettid()
+ 		fmt.Println("joinMountAndExec() 当前线程的线程号:", tid) 
 
 		// Last but not least, execute the workload.
 		errChan <- f()

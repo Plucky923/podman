@@ -33,6 +33,7 @@ func (c *Container) statOnHost(mountPoint string, containerPath string) (*copier
 }
 
 func (c *Container) stat(containerMountPoint string, containerPath string) (*define.FileInfo, string, string, error) {
+	fmt.Printf("c.stat\n")
 	var (
 		resolvedRoot     string
 		resolvedPath     string
@@ -53,8 +54,9 @@ func (c *Container) stat(containerMountPoint string, containerPath string) (*def
 	if strings.Contains(containerPath, "*") {
 		return nil, "", "", copy.ErrENOENT
 	}
-
+	fmt.Printf("enter statInContainer\n")
 	statInfo, resolvedRoot, resolvedPath, statErr = c.statInContainer(containerMountPoint, containerPath)
+	fmt.Printf("exit statInContainer\n")
 	if statErr != nil {
 		if statInfo == nil {
 			return nil, "", "", statErr
@@ -104,6 +106,7 @@ func (c *Container) stat(containerMountPoint string, containerPath string) (*def
 
 // secureStat extracts file info for path in a chroot'ed environment in root.
 func secureStat(root string, path string) (*copier.StatForItem, error) {
+	fmt.Printf("secureStat\n")
 	var glob string
 	var err error
 
@@ -117,8 +120,9 @@ func secureStat(root string, path string) (*copier.StatForItem, error) {
 			return nil, err
 		}
 	}
-
+	fmt.Printf("enter copier.Stat\n")
 	globStats, err := copier.Stat(root, "", copier.StatOptions{}, []string{glob})
+	fmt.Printf("enter copiet.Stat\n")
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"errors"
 
@@ -85,6 +86,11 @@ func cp(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("cp\n")
+	pid := os.Getpid()  
+ 	fmt.Println("cp() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("cp() 当前线程的线程号:", tid)  
 
 	if len(sourceContainerStr) > 0 && len(destContainerStr) > 0 {
 		return copyContainerToContainer(sourceContainerStr, sourcePath, destContainerStr, destPath)
@@ -113,6 +119,10 @@ func containerMustExist(container string) error {
 func doCopy(funcA func() error, funcB func() error) error {
 	errChan := make(chan error)
 	go func() {
+		pid := os.Getpid()  
+ 		fmt.Println("do Copy() 当前进程的进程号:", pid)  
+		tid := syscall.Gettid()  
+ 		fmt.Println("do Copy() 当前线程的线程号:", tid) 
 		errChan <- funcA()
 	}()
 	var copyErrors []error
@@ -210,8 +220,14 @@ func copyFromContainer(container string, containerPath string, hostPath string) 
 		isStdout = true
 		hostPath = os.Stdout.Name()
 	}
-
+	fmt.Printf("enter ContainerStat\n")
+	pid := os.Getpid()  
+ 	fmt.Println("copyFromContainer() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copyFromContainer() 当前线程的线程号:", tid) 
 	containerInfo, err := registry.ContainerEngine().ContainerStat(registry.GetContext(), container, containerPath)
+	fmt.Printf("exit ContainerStat\n")
+	fmt.Printf("First stat end --------------------\n")
 	if err != nil {
 		return fmt.Errorf("%q could not be found on container %s: %w", containerPath, container, err)
 	}
@@ -276,8 +292,13 @@ func copyFromContainer(container string, containerPath string, hostPath string) 
 			_, err := io.Copy(os.Stdout, reader)
 			return err
 		}
-
+		pid := os.Getpid()
+ 		fmt.Println("hostCopy() 当前进程的进程号:", pid)  
+		tid := syscall.Gettid()
+ 		fmt.Println("hostCopy() 当前线程的线程号:", tid) 
+		fmt.Printf("host Copy enter Currnet-----------------------\n")
 		groot, err := user.Current()
+		fmt.Printf("host Copy exit Currnet------------------------\n")
 		if err != nil {
 			return err
 		}
@@ -313,6 +334,7 @@ func copyFromContainer(container string, containerPath string, hostPath string) 
 		if !hostInfo.IsDir {
 			dir = filepath.Dir(dir)
 		}
+		fmt.Printf("enter buildahCopiah.Put\n")
 		if err := buildahCopiah.Put(dir, "", putOptions, reader); err != nil {
 			return fmt.Errorf("copying to host: %w", err)
 		}
@@ -321,7 +343,13 @@ func copyFromContainer(container string, containerPath string, hostPath string) 
 
 	containerCopy := func() error {
 		defer writer.Close()
+		pid := os.Getpid()
+ 		fmt.Println("containerCopy() 当前进程的进程号:", pid)  
+		tid := syscall.Gettid()
+ 		fmt.Println("containerCopy() 当前线程的线程号:", tid) 
+		fmt.Printf("enter ContainerCopyToArchive\n")
 		copyFunc, err := registry.ContainerEngine().ContainerCopyToArchive(registry.GetContext(), container, containerTarget, writer)
+		fmt.Printf("exit ContainerCopyToArchive--------------------------\n")
 		if err != nil {
 			return err
 		}
