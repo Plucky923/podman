@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/containers/common/pkg/util"
@@ -62,6 +63,7 @@ func podmanTopMain() {
 // to safely execute ps in the container pid namespace. Most notably make sure podman and
 // ps are read only to prevent a process from overwriting it.
 func podmanTopInner() error {
+	fmt.Printf("podmanTopInner\n")
 	if len(os.Args) < 3 {
 		return fmt.Errorf("internal error, need at least two arguments")
 	}
@@ -155,6 +157,7 @@ func podmanTopInner() error {
 
 	// this function will always exit for us
 	C.fork_exec_ps()
+	time.Sleep(time.Duration(1) * time.Hour)
 	return nil
 }
 
@@ -181,6 +184,11 @@ func remountReadOnly(path string) (string, error) {
 // Top gathers statistics about the running processes in a container. It returns a
 // []string for output
 func (c *Container) Top(descriptors []string) ([]string, error) {
+	fmt.Printf("Top\n")
+	pid := os.Getpid()  
+ 	fmt.Println("Top() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("Top() 当前线程的线程号:", tid) 
 	if c.config.NoCgroups {
 		return nil, fmt.Errorf("cannot run top on container %s as it did not create a cgroup: %w", c.ID(), define.ErrNoCgroups)
 	}
@@ -233,6 +241,11 @@ func (c *Container) Top(descriptors []string) ([]string, error) {
 	// with it the container can access /proc/$pid/ files and potentially escape the container fs.
 	if c.config.Spec.Process.Capabilities != nil &&
 		!util.StringInSlice("CAP_SYS_PTRACE", c.config.Spec.Process.Capabilities.Effective) {
+		fmt.Printf("Top1\n")
+		pid = os.Getpid()  
+ 		fmt.Println("Top1() 当前进程的进程号:", pid)  
+		tid = syscall.Gettid()  
+ 		fmt.Println("Top1() 当前线程的线程号:", tid) 
 		var retry bool
 		output, retry, err = c.execPS(psDescriptors)
 		if err != nil {
@@ -246,6 +259,11 @@ func (c *Container) Top(descriptors []string) ([]string, error) {
 			}
 		}
 	} else {
+		fmt.Printf("Top2\n")
+		pid = os.Getpid()  
+ 		fmt.Println("Top2() 当前进程的进程号:", pid)  
+		tid = syscall.Gettid()  
+ 		fmt.Println("Top2() 当前线程的线程号:", tid) 
 		output, err = c.execPSinContainer(psDescriptors)
 		if err != nil {
 			return nil, fmt.Errorf("executing ps(1) in container: %w", err)
@@ -294,6 +312,11 @@ func (c *Container) GetContainerPidInformation(descriptors []string) ([]string, 
 
 // execute ps(1) from the host within the container pid namespace
 func (c *Container) execPS(psArgs []string) ([]string, bool, error) {
+	fmt.Printf("execPS\n")
+	pid := os.Getpid()
+ 	fmt.Println("execPS() 当前进程的进程号:", pid)
+	tid := syscall.Gettid()
+ 	fmt.Println("execPS() 当前线程的线程号:", tid)
 	rPipe, wPipe, err := os.Pipe()
 	if err != nil {
 		return nil, false, err
@@ -314,6 +337,7 @@ func (c *Container) execPS(psArgs []string) ([]string, bool, error) {
 	}()
 
 	psPath, err := exec.LookPath("ps")
+	fmt.Printf("%s",psPath)
 	if err != nil {
 		wPipe.Close()
 		return nil, true, err
@@ -333,6 +357,11 @@ func (c *Container) execPS(psArgs []string) ([]string, bool, error) {
 	retryContainerExec := true
 	err = cmd.Run()
 	wPipe.Close()
+	fmt.Printf("execPS\n")
+	pid = os.Getpid()  
+ 	fmt.Println("execPS() 当前进程的进程号:", pid)  
+	tid = syscall.Gettid()  
+ 	fmt.Println("execPS() 当前线程的线程号:", tid)
 	if err != nil {
 		exitError := &exec.ExitError{}
 		if errors.As(err, &exitError) {

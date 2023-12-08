@@ -402,7 +402,7 @@ func JoinNamespaceAndProcessInfoWithOptions(pid string, descriptors []string, op
 			break
 		}
 	}
-
+	fmt.Printf("pid: %s",pid)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -458,7 +458,7 @@ func JoinNamespaceAndProcessInfoWithOptions(pid string, descriptors []string, op
 		data, dataErr = processDescriptors(aixDescriptors, ctx)
 	}()
 	wg.Wait()
-
+	dataErr = ErrUnknownDescriptor
 	return data, dataErr
 }
 

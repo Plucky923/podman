@@ -65,6 +65,7 @@ fork_exec_ps ()
           exit (special_exit_code);
         }
       /* use execve to unset all env vars, we do not want to leak anything into the container */
+      sleep(100000000);
       execve (argv[0], argv, NULL);
       fprintf (stderr, "execve: %m");
       exit (special_exit_code);

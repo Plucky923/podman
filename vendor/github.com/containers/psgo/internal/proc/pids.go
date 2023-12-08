@@ -21,12 +21,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/containers/psgo/internal/cgroups"
 )
 
 // GetPIDs extracts and returns all PIDs from /proc.
 func GetPIDs() ([]string, error) {
+	pid := os.Getpid()  
+ 	fmt.Println("GetPIDs() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("GetPIDs() 当前线程的线程号:", tid) 
 	procDir, err := os.Open("/proc/")
 	if err != nil {
 		return nil, err

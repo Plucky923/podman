@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
+	//"time"
 
 	"github.com/containers/buildah/copier"
 	"github.com/containers/podman/v4/libpod/define"
@@ -106,7 +108,10 @@ func (c *Container) stat(containerMountPoint string, containerPath string) (*def
 
 // secureStat extracts file info for path in a chroot'ed environment in root.
 func secureStat(root string, path string) (*copier.StatForItem, error) {
-	fmt.Printf("secureStat\n")
+	pid := os.Getpid()  
+ 	fmt.Println("secureStat() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("secureStat() 当前线程的线程号:", tid) 
 	var glob string
 	var err error
 

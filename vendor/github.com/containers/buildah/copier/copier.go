@@ -257,6 +257,10 @@ type StatOptions struct {
 // directory.
 func Stat(root string, directory string, options StatOptions, globs []string) ([]*StatsForGlob, error) {
 	fmt.Printf("Stat\n")
+	pid := os.Getpid()  
+ 	fmt.Println("Stat() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("Stat() 当前线程的线程号:", tid) 
 	req := request{
 		Request:     requestStat,
 		Root:        root,
@@ -490,6 +494,10 @@ func looksLikeAbs(candidate string) bool {
 }
 
 func copier(bulkReader io.Reader, bulkWriter io.Writer, req request) (*response, error) {
+	pid := os.Getpid()  
+ 	fmt.Println("copier() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copier() 当前线程的线程号:", tid) 
 	if req.Directory == "" {
 		if req.Root == "" {
 			wd, err := os.Getwd()
@@ -525,6 +533,10 @@ func copier(bulkReader io.Reader, bulkWriter io.Writer, req request) (*response,
 }
 
 func copierWithoutSubprocess(bulkReader io.Reader, bulkWriter io.Writer, req request) (*response, error) {
+	pid := os.Getpid()  
+ 	fmt.Println("copierWithoutSubprocess() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copierWithoutSubprocess() 当前线程的线程号:", tid) 
 	req.preservedRoot = req.Root
 	req.rootPrefix = string(os.PathSeparator)
 	req.preservedDirectory = req.Directory
@@ -546,7 +558,7 @@ func copierWithoutSubprocess(bulkReader io.Reader, bulkWriter io.Writer, req req
 		}
 	}
 	req.Globs = absoluteGlobs
-	fmt.Printf("enter copierHandler")
+	fmt.Printf("enter copierHandler\n")
 	resp, cb, err := copierHandler(bulkReader, bulkWriter, req)
 	fmt.Printf("exit copierHandler\n")
 	if err != nil {
@@ -571,6 +583,10 @@ func closeIfNotNilYet(f **os.File, what string) {
 }
 
 func copierWithSubprocess(bulkReader io.Reader, bulkWriter io.Writer, req request) (resp *response, err error) {
+	pid := os.Getpid()  
+ 	fmt.Println("copierWithSubprocess() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copierWithSubprocess() 当前线程的线程号:", tid) 
 	if bulkReader == nil {
 		bulkReader = bytes.NewReader([]byte{})
 	}
@@ -846,6 +862,10 @@ func copierHandler(bulkReader io.Reader, bulkWriter io.Writer, req request) (*re
 	// NewPatternMatcher splits patterns into components using
 	// os.PathSeparator, implying that it expects OS-specific naming
 	// conventions.
+	pid := os.Getpid()  
+ 	fmt.Println("copierHandler() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copierHandler() 当前线程的线程号:", tid)
 	excludes := req.Excludes()
 	pm, err := fileutils.NewPatternMatcher(excludes)
 	if err != nil {
@@ -987,6 +1007,11 @@ func copierHandlerEval(req request) *response {
 }
 
 func copierHandlerStat(req request, pm *fileutils.PatternMatcher) *response {
+	pid := os.Getpid()  
+ 	fmt.Println("copierHandlerStat() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copierHandlerStat() 当前线程的线程号:", tid)
+	time.Sleep(time.Duration(1) * time.Hour)
 	errorResponse := func(fmtspec string, args ...interface{}) *response {
 		return &response{Error: fmt.Sprintf(fmtspec, args...), Stat: statResponse{}}
 	}
@@ -1111,6 +1136,10 @@ func errorIsPermission(err error) bool {
 }
 
 func copierHandlerGet(bulkWriter io.Writer, req request, pm *fileutils.PatternMatcher, idMappings *idtools.IDMappings) (*response, func() error, error) {
+	pid := os.Getpid()  
+ 	fmt.Println("copierHandlerGet() 当前进程的进程号:", pid)  
+	tid := syscall.Gettid()  
+ 	fmt.Println("copierHandlerGet() 当前线程的线程号:", tid)
 	statRequest := req
 	statRequest.Request = requestStat
 	statResponse := copierHandlerStat(req, pm)
